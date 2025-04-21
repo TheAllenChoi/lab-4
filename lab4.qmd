@@ -1,5 +1,5 @@
 ---
-title: "Lab 3: Static Dashboards"
+title: "Lab 4: Interactive Dashboards"
 author: Allen
 format: 
   dashboard:
@@ -11,10 +11,12 @@ format:
         href: https://github.com/TheAllenChoi
       - icon: linkedin
         href: https://www.linkedin.com/in/allen-choi/
+server: shiny
 ---
 
 ```{r}
 #| label: packages-initialize
+#| context: setup
 library(tidyverse)
 library(here)
 library(plotly)
@@ -22,10 +24,14 @@ library(ggridges)
 library(leaflet)
 library(rnaturalearth)
 library(kableExtra)
+library(shiny)
+library(bslib)
 ```
 
 ```{r}
 #| label: data-read-in
+#| cache: true
+#| context: setup
 data <- readxl::read_xlsx(here("wgm2018-dataset-crosstabs-all-countries.xlsx"),
                                sheet = 2)
 data_dict <- readxl::read_xlsx(here("wgm2018-dataset-crosstabs-all-countries.xlsx"),
@@ -34,9 +40,16 @@ data_dict <- readxl::read_xlsx(here("wgm2018-dataset-crosstabs-all-countries.xls
 
 # Trust in Vaccines (2018)
 
+## {.sidebar}
+```{r}
+
+```
+
+
 ## Over World Regions
 ```{r}
 #| title: Percentage of People who Believe Vaccines are Safe
+#| context: setup
 data_dict_vaccine <- data_dict
 data_dict_vaccine <- data_dict_vaccine[1, 3] |> 
   rename(country = `Variable Type & Codes*`) |> 
@@ -104,6 +117,7 @@ final |>
 
 ## Overview of the data
 ```{r}
+#| context: setup
 final |> 
   left_join(regions, by = join_by(country == country)) |> 
   arrange(desc(percentage)) |> 
@@ -120,6 +134,7 @@ final |>
 
 ```{r}
 #| title: Response to Trust in Doctors/Nurses
+#| context: setup
 
 data_doctor <- data |> 
   select(WP5, Q11E)
@@ -181,6 +196,7 @@ country_map_info |>
 
 ```{r}
 #| title: Response to Trust in Doctors/Nurses
+#| context: setup
 doctor_2020 <- read_csv("wgm_full_wave2_public_file_final (1)_csv.csv",
                         col_select = c("COUNTRYNEW", "W5E"))
 
@@ -221,6 +237,12 @@ country_map_info |>
             opacity = 1)
 ```
 :::
+
+## {.sidebar}
+```{r}
+selectInput("statistics", "Statistic",
+            c("Mean", "Median", "25th Percentile", "75th Percentile"))
+```
 
 ## Row {width="30%"}
 
