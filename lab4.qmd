@@ -30,7 +30,6 @@ library(bslib)
 
 ```{r}
 #| label: data-read-in
-#| cache: true
 #| context: setup
 data <- readxl::read_xlsx(here("wgm2018-dataset-crosstabs-all-countries.xlsx"),
                                sheet = 2)
@@ -113,6 +112,8 @@ final |>
        x = "") +
   scale_x_continuous(limits = c(.2, 1), labels = scales::label_percent()) +
   scale_fill_brewer(palette = "Spectral")
+
+## Sliding quartile could work....
 ```
 
 ## Overview of the data
@@ -167,7 +168,10 @@ map_data <- data_doctor |>
     country == "United States" ~ "United States of America",
     .default = country
   ))
-# mean(map_data$percent)
+mean1 <- mean(map_data$percent)
+median1 <- median(map_data$percent)
+percentile_25_1 <- as.numeric(quantile(map_data$percent, 0.25))
+percentile_75_1 <- as.numeric(quantile(map_data$percent, 0.75))
 
 country_map_info <- ne_countries(returnclass = "sf")
 country_map_info <- country_map_info |> 
@@ -235,6 +239,11 @@ country_map_info |>
   addLegend(pal = colors, values = country_map_info$percent,
             title = "Percent <br> (Response = 'A lot'/'Some')",
             opacity = 1)
+
+mean2 <- mean(map_data$percent)
+median2 <- median(map_data$percent)
+percentile_25_2 <- as.numeric(quantile(map_data$percent, 0.25))
+percentile_75_2 <- as.numeric(quantile(map_data$percent, 0.75))
 ```
 :::
 
@@ -246,11 +255,57 @@ selectInput("statistics", "Statistic",
 
 ## Row {width="30%"}
 
-::: {.card title="2018 Average Trust"}
-The average percentage of people who would say they trust their doctors and nurses in 2018 is 80.69%.
+::: {.card title="2018 Trust"}
+```{r}
+textOutput("text1")
+```
+
+```{r}
+#| context: server
+
+stat1 <- reactive({
+  if (input$statistics == "Mean") {
+    round(mean1, digits = 4) * 100
+  } else if (input$statistics == "Median") {
+    round(median1, digits = 4) * 100
+  } else if (input$statistics == "25th Percentile") {
+    round(percentile_25_1, digits = 4) * 100
+  } else if (input$statistics == "75th Percentile") {
+    round(percentile_75_1, digits = 4) * 100
+}
+})
+
+output$text1 <- renderText({
+  paste("The", input$statistics, "of the percentage of people who would say
+        they trust their doctors and nurses in 2018 is", paste0(stat1(), "%"))
+})
+```
+
 :::
 
-::: {.card title="2020 Average Trust"}
-The average percentage of people who would say they trust their doctors and nurses in 2020 is 83.17%.
+::: {.card title="2020 Trust"}
+```{r}
+textOutput("text2")
+```
+
+```{r}
+#| context: server
+stat2 <- reactive({
+  if (input$statistics == "Mean") {
+    round(mean2, digits = 4) * 100
+  } else if (input$statistics == "Median") {
+    round(median2, digits = 4) * 100
+  } else if (input$statistics == "25th Percentile") {
+    round(percentile_25_2, digits = 4) * 100
+  } else if (input$statistics == "75th Percentile") {
+    round(percentile_75_2, digits = 4) * 100
+}
+})
+
+output$text2 <- renderText({
+  paste("The", input$statistics, "of the percentage of people who would say
+        they trust their doctors and nurses in 2020 is", paste0(stat2(), "%"))
+})
+```
 :::
 
