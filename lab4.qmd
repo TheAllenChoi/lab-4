@@ -31,10 +31,22 @@ library(bslib)
 ```{r}
 #| label: data-read-in
 #| context: setup
-data <- readxl::read_xlsx(here("wgm2018-dataset-crosstabs-all-countries.xlsx"),
-                               sheet = 2)
-data_dict <- readxl::read_xlsx(here("wgm2018-dataset-crosstabs-all-countries.xlsx"),
-                               sheet = 3)
+
+
+
+# data <- readxl::read_xlsx(here("wgm2018-dataset-crosstabs-all-countries.xlsx"),
+#                                sheet = 2)
+
+# have to preprocess data before or shinyapp crashes maybe
+# subset <- data |>
+#   select(WP5, Q25, Regions_Report, Q11E)
+# write.csv(subset, "data_subset.csv", row.names = FALSE)
+
+data <- read_csv(here("data_subset.csv"), show_col_types = FALSE)
+# data_dict <- readxl::read_xlsx(here("wgm2018-dataset-crosstabs-all-countries.xlsx"),
+#                                sheet = 3)
+# write.csv(data_dict, "data_dict.csv", row.names = FALSE)
+data_dict <- read_csv(here("data_dict.csv"), show_col_types = FALSE)
 ```
 
 # Trust in Vaccines (2018)
@@ -212,7 +224,7 @@ country_map_info |>
 #| title: Response to Trust in Doctors/Nurses
 #| context: setup
 doctor_2020 <- read_csv("wgm_full_wave2_public_file_final (1)_csv.csv",
-                        col_select = c("COUNTRYNEW", "W5E"))
+                        col_select = c("COUNTRYNEW", "W5E"), show_col_types = FALSE)
 
 map_data <- doctor_2020 |> 
   group_by(COUNTRYNEW) |> 
