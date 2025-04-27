@@ -14,7 +14,7 @@ format:
 server: shiny
 ---
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #| label: packages-initialize
 #| context: setup
 library(tidyverse)
@@ -129,7 +129,7 @@ output$plot <- renderPlot({
     labs(y = "",
          x = "") +
     scale_x_continuous(limits = c(.2, 1), labels = scales::label_percent()) +
-    scale_fill_brewer(palette = "Spectral")
+    scale_fill_brewer(palette = "YlGnBu")
 })
 ```
 
@@ -143,9 +143,15 @@ plotOutput("plot")
 #| context: setup
 final |> 
   left_join(regions, by = join_by(country == country)) |> 
-  arrange(desc(percentage)) |> 
-  kable() |> 
-  kable_styling()
+  arrange(desc(percentage)) |>
+  rename(Country = country,
+         Percent = percentage,
+         Region = region) |> 
+  mutate(Percent = round(Percent * 100, 2)) |> 
+  mutate(Percent = paste0(Percent, "%")) |> 
+  kable(caption = "Trust in Vaccines by Country and Region (2018)") |> 
+  kable_minimal("hover") |> 
+  kable_styling(fixed_thead = TRUE)
 ```
 
 
@@ -156,7 +162,7 @@ final |>
 ## 2018 {width="70%"}
 
 ```{r}
-#| title: Response to Trust in Doctors/Nurses
+#| title: Response to Trust in Doctors/Nurses (Where Response is "A lot" or "Some")
 #| context: setup
 
 data_doctor <- data |> 
@@ -203,8 +209,8 @@ country_map_info <- country_map_info |>
   
 colors <- colorNumeric(palette = "YlGnBu", domain = country_map_info$percent)
 country_map_info |> 
-  leaflet() |> 
-  addTiles(options = tileOptions(noWrap = TRUE)) |> 
+  leaflet(options = leafletOptions(minZoom = 2)) |> 
+  addTiles() |> 
   addPolygons(color = colors(country_map_info$percent),
               weight = 2,
               popup = paste0(
@@ -215,7 +221,9 @@ country_map_info |>
               fillOpacity = 1) |> 
   addLegend(pal = colors, values = country_map_info$percent,
             title = "Percent <br> (Response = 'A lot'/'Some')",
-            opacity = 1)
+            opacity = 1) |> 
+  setMaxBounds(lng1 = 20, lat1 = 30,
+               lng2 = 10, lat2 = 10)
 ```
 
 ## 2020
@@ -248,8 +256,8 @@ country_map_info <- country_map_info |>
   
 colors <- colorNumeric(palette = "YlGnBu", domain = country_map_info$percent)
 country_map_info |> 
-  leaflet() |> 
-  addTiles(options = tileOptions(noWrap = TRUE)) |> 
+  leaflet(options = leafletOptions(minZoom = 2)) |> 
+  addTiles() |> 
   addPolygons(color = colors(country_map_info$percent),
               weight = 2,
               popup = paste0(
@@ -260,7 +268,9 @@ country_map_info |>
               fillOpacity = 1) |> 
   addLegend(pal = colors, values = country_map_info$percent,
             title = "Percent <br> (Response = 'A lot'/'Some')",
-            opacity = 1)
+            opacity = 1) |> 
+  setMaxBounds(lng1 = 20, lat1 = 30,
+               lng2 = 10, lat2 = 10)
 
 mean2 <- mean(map_data$percent)
 median2 <- median(map_data$percent)
